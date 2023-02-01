@@ -1,6 +1,8 @@
-/* Haley Psomas-Sheridan    *
- * CS 370, Fall 2019        *
- * minesweeper.js           */
+/* Haley Psomas-Sheridan                    *
+ * minesweeper game using d3 and BFS        *
+ * minesweeper.js                           */
+
+timerStarted = false; 
 
 
 function appendMineToSelection(selection) {
@@ -36,48 +38,6 @@ function appendMineToSelection(selection) {
         .attr('transform', 'translate(16, 16)');
 }
 
-
-function createTimer(width) {
-    let minutes = 0, seconds = 0;
-    // place the digits of the timer in the item whose
-    // class-name is main-svg.
-
-    const clock = d3.select('.main-svg').append('g')
-        .attr('class', 'clock')
-        .attr('transform', `translate(${width / 2}, 30)`)
-        .attr("transform", "translate(70,30)")
-        .append('text')
-        .attr('class', 'clock-text')
-        .attr('text-anchor', 'middle')
-        .attr('font-size', 40)
-        .attr('stroke', 'black')
-        .attr('fill', 'black');
-
-    function updateClock(clock, minutes, seconds) {
-        // format the timer's text.
-        clock.text(`${d3.format("02d")(minutes)}:${d3.format('02d')(seconds)}`);
-    }
-
-    updateClock(clock, 0, 0);  // display 0:0
-    return function () {
-        return d3.interval(() => {
-            // Every second, add one to the seconds variable,
-            // update the minute variable if necessary, and
-            // update the text of the timer.
-            seconds += 1;
-            minutes += Math.floor(seconds / 60);
-            seconds %= 60;
-            updateClock(clock, minutes, seconds);
-        }, 1000);
-    };
-}
-
-function timerDemo() {
-    d3.select('body').append('svg').attr('width', 300).attr('height', 200);//.attr('class', 'svg');
-    const timerFunction = createTimer(300);  // create and display the timer (doesn't start the timer.)
-    myTimer = timerFunction(); // start the timer.
-
-}
 
 function createConfigurationParameters(numRows, numColumns) {
     const configAttributes = { //variable names configAttributes
@@ -271,15 +231,15 @@ function playMinesweeper(rows, columns, percentageOfMines) {
             }
         }
     }
-
-
+    //d3.select('body').append('svg').attr('width', 300).attr('height', 200);//.attr('class', 'svg');
+   
     const svg = d3.select('body')
         .append('svg')
         .attr('class', 'main-svg')
         .attr('width', configAttrs.svg_width)
         .attr('height', configAttrs.svg_height)
-        .attr('transform', `translate(${configAttrs.svg_margins.left}, ${configAttrs.svg_margins.top})`); //puts image in reasonable place
-
+        .attr('transform', "translate(30,30)");
+       // .attr('transform', `translate(${configAttrs.svg_margins.left}, ${configAttrs.svg_margins.top})`); //puts image in reasonable place
 
     // create the board
     //create groups for each of the rows
@@ -289,9 +249,12 @@ function playMinesweeper(rows, columns, percentageOfMines) {
         .enter()
         .append('g')
         .attr('class', 'row-group') //give it a class name
-        .attr('transform', (d, i) => `translate(${configAttrs.margins.left}, 
-                    ${configAttrs.margins.top + i * (configAttrs.board_cell_size + configAttrs.board_cell_gap)})`);
-    //transform moves it to the left (x) so that there is a margin to the left and gives it enough y as rows are added (also accounting for the y margin)
+        //.attr('transform', (d, i) => `translate(${configAttrs.margins.left}, 
+        //            ${configAttrs.margins.top + i * (configAttrs.board_cell_size + configAttrs.board_cell_gap)})`);
+        .attr('transform', (d, i) => `translate(30, 
+                    ${30+ i * (configAttrs.board_cell_size + configAttrs.board_cell_gap)})`);
+        
+        //transform moves it to the left (x) so that there is a margin to the left and gives it enough y as rows are added (also accounting for the y margin)
 
     //this puts cells into the rows
     const allCells = rowGroups.selectAll('.board-cell') //for each row, you bind the data
@@ -317,9 +280,12 @@ function playMinesweeper(rows, columns, percentageOfMines) {
 
         .on("click", function (d) { //click handler
             d3.event.preventDefault();  //this prevents the browser from opening its own default event when right click happens
-
+            
+           
             if(inPlay == false){ //is this the first click?
-                timerDemo();
+                timerStarted = true; 
+                
+                startTimer(); 
                 inPlay = true;
             }
 
@@ -354,7 +320,7 @@ function playMinesweeper(rows, columns, percentageOfMines) {
                     .attr('fill', '#D3D3D9');
 
                 //STOP THE TIMER!
-                d3.timer(() => myTimer.stop());
+                stopTimer(); 
 
             } else if (d.adjacent_mines > 0) {//show the singular cell
 
@@ -415,7 +381,7 @@ function playMinesweeper(rows, columns, percentageOfMines) {
                    .attr("transform", "translate(175,260)");
 
                 //STOP THE TIMER!
-                d3.timer(() => myTimer.stop());
+                stopTimer(); 
             }
         })
         .on("contextmenu", function (d) { // right-click
@@ -423,7 +389,8 @@ function playMinesweeper(rows, columns, percentageOfMines) {
             const g = d3.select(`.board-cell-g-${d.row}-${d.column}`); //selects the group in which the rectangle (that was clicked) presides
 
             if(inPlay == false){
-                timerDemo();
+                timerStarted = true; 
+                startTimer();
                 inPlay = true;
             }
 
@@ -446,6 +413,41 @@ function playMinesweeper(rows, columns, percentageOfMines) {
             }
 
         });
+    
+     createRestart();
+     function createRestart(){
+      
+        //d3.select('body').append('svg').attr('width', 500).attr('height', 500);
+        const restart = d3.select('.main-svg').append('g');
+  
+        //Restart
+        restart.append('rect')
+            .attr('width', '120')
+            .attr('height', '110')
+            .attr('fill', 'yellow')
+            .attr('transform', 'translate(335,-70)');
+  
+        //Fun win statement
+        restart.append('text')
+            .attr('fill', 'black')
+            .text('Restart')
+            .attr('font-weight', 'bold')
+            .style("font-size", "35px")
+           .attr("transform", "translate(340,30)");
+  
+        restart.on("click", function (d) { //click handler 
+            console.log("clicked restart!");
+            d3.selectAll('svg').remove();
+           
+            if(timerStarted === true){
+                stopTimer(); 
+            }
+            
+            const rows = 10, columns = 10, percentageOfMines = 0.3;
+            playMinesweeper(rows, columns, percentageOfMines);
+        }); 
+        
+  }
 
 
 //code.iamkate.com for use of Queue
@@ -473,5 +475,59 @@ function playMinesweeper(rows, columns, percentageOfMines) {
     };
 }
 
+
+var myVar = false; 
+
+function updateClock() {
+    // format the timer's text.
+    // Every second, add one to the seconds variable,
+    // change the minute variable if necessary, and
+    // change the text of the timer.
+    seconds += 1;
+    minutes += Math.floor(seconds / 60);
+    seconds %= 60;
+    //console.log( "updating clock ", minutes," ", seconds)
+            
+    clock.text(`${d3.format("02d")(minutes)}:${d3.format('02d')(seconds)}`);
+   
+}
+
+let clock; 
+let minutes = 0; 
+let seconds  = 0; 
+
+function createTimer(width) {   
+    // place the digits of the timer in the item whose
+    // class-name is main-svg.
+    //d3.select('body').append('svg').attr('width', 300).attr('height', 200);//.attr('class', 'svg');
+    
+    clock = d3.select('.main-svg').append('g')
+        .attr('class', 'clock1')
+        .attr('transform', `translate(${width / 2}, 29)`)
+        .attr("transform", "translate(70,29)")
+        .append('text')
+        .attr('class', 'clock-text1')
+        .attr('text-anchor', 'middle')
+        .attr('font-size', 40)
+        .attr('stroke', 'black')
+        .attr('fill', 'black');
+
+    updateClock();  // display 0:0
+}
+
+
+function stopTimer() {
+    clearInterval(myVar);
+    minutes = 0;
+    seconds = 0;
+    myVar = false;
+}
+
+function startTimer() {  
+    if(myVar == false){
+        createTimer(300); 
+        myVar = setInterval(updateClock, 1000);
+    }  
+}
 
 
