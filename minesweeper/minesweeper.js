@@ -3,6 +3,7 @@
  * minesweeper.js                           */
 
 timerStarted = false; 
+let minesFound = 0; 
 
 
 function appendMineToSelection(selection) {
@@ -81,7 +82,8 @@ function playMinesweeper(rows, columns, percentageOfMines) {
             column: j,
             adjacent_mines: 0,
             is_mine_cell: Math.random() <= percentageOfMines, //[0-1) percentageOfMines = 30%
-            isClicked: false
+            flagAdded: false,
+            isClicked: false,
 
 
         }))
@@ -281,12 +283,16 @@ function playMinesweeper(rows, columns, percentageOfMines) {
         .on("click", function (d) { //click handler
             d3.event.preventDefault();  //this prevents the browser from opening its own default event when right click happens
             
-           
             if(inPlay == false){ //is this the first click?
                 timerStarted = true; 
                 
                 startTimer(); 
                 inPlay = true;
+            }
+            
+            if(d.flagAdded){
+                console.log("REMOVE FLAG")
+                d3.select("path").remove(); 
             }
 
             if (d.is_mine_cell == true) { //if the cell has a mine
@@ -321,6 +327,7 @@ function playMinesweeper(rows, columns, percentageOfMines) {
 
                 //STOP THE TIMER!
                 stopTimer(); 
+               
 
             } else if (d.adjacent_mines > 0) {//show the singular cell
 
@@ -344,7 +351,8 @@ function playMinesweeper(rows, columns, percentageOfMines) {
             }
 
             //Win condition = number of unopened cells == number of mines
-            if(numUnopened == numMines){
+            //if(numUnopened == numMines){
+            if(minesFound == numMines){
 
                 //print a win statement!
                 d3.select('body').append('svg').attr('width', 500).attr('height', 500);
@@ -393,6 +401,16 @@ function playMinesweeper(rows, columns, percentageOfMines) {
                 startTimer();
                 inPlay = true;
             }
+            if(d.is_mine_cell){
+                console.log("Flagged mine cell"); 
+                //numUnopened--; 
+                minesFound++;
+            }
+            console.log(d);
+            if(d.flagAdded){
+                console.log("REMOVE FLAG")
+                d3.select("path").remove(); 
+            }
 
             if (d.isClicked == false) {
 
@@ -409,7 +427,9 @@ function playMinesweeper(rows, columns, percentageOfMines) {
 
             } else { //remove the flag on second right click on same cell
                 d3.select("path").remove();
+                
                 d.isClicked = false;
+                numUnopened++; 
             }
 
         });
@@ -422,18 +442,18 @@ function playMinesweeper(rows, columns, percentageOfMines) {
   
         //Restart
         restart.append('rect')
-            .attr('width', '120')
-            .attr('height', '110')
-            .attr('fill', 'yellow')
-            .attr('transform', 'translate(335,-70)');
+            .attr('width', '100')
+            .attr('height', '122')
+            .attr('fill', '#FF5733')
+            .attr('transform', 'translate(335,-95)');
   
         //Fun win statement
         restart.append('text')
             .attr('fill', 'black')
             .text('Restart')
             .attr('font-weight', 'bold')
-            .style("font-size", "35px")
-           .attr("transform", "translate(340,30)");
+            .style("font-size", "28px")
+           .attr("transform", "translate(340,22)");
   
         restart.on("click", function (d) { //click handler 
             console.log("clicked restart!");

@@ -1,2 +1,5 @@
 minesweeper/timer.js
 minesweeper/minesweeper.html
+.gitignore
+node_modules
+.vscode
