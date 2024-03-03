@@ -5,7 +5,7 @@
 timerStarted = false; 
 let minesFound = 0; 
 
-
+/* This function draws the mines */
 function appendMineToSelection(selection) {
 
     var mine_circle_radius = 8;
@@ -243,7 +243,7 @@ function playMinesweeper(rows, columns, percentageOfMines) {
         .attr('transform', "translate(30,30)");
        // .attr('transform', `translate(${configAttrs.svg_margins.left}, ${configAttrs.svg_margins.top})`); //puts image in reasonable place
 
-    // create the board
+    //create the board
     //create groups for each of the rows
     const rowGroups = svg //everything in the row is in a group, this allows us to apply the transform just once for every row
         .selectAll('.row-group') //doesnt exist to begin with
@@ -435,6 +435,8 @@ function playMinesweeper(rows, columns, percentageOfMines) {
         });
     
      createRestart();
+
+     //Reastart minesweeper game
      function createRestart(){
       
         //d3.select('body').append('svg').attr('width', 500).attr('height', 500);
