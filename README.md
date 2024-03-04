@@ -34,7 +34,7 @@ npm -v
 
 If no version number is returned, follow instructions for installing Node and npm 
 https://nodejs.org/en/download (pick the option that is most appropriate for your OS).
-After downloading, repeat step 2 to make sure that node and npm are installed. 
+After downloading, repeat step 2 to make sure that node and npm are installed. Windows: You may have to restart command prompt and open Node.js command prompt.
 
 A more in-depth description of how to install Node.js and npm on Windows. https://phoenixnap.com/kb/install-node-js-npm-on-windows
 
